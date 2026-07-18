@@ -1,6 +1,7 @@
 import HTMLFlipBook from 'react-pageflip';
 import styles from './Book.module.css';
 import IliadText from './assets/iliad.json';
+import type { JSX } from 'react/jsx-runtime';
 
 function MyBook() {
 
@@ -24,7 +25,6 @@ function MyBook() {
     if(!stopReached){ 
         end++;
         startIncrement ++;
-        console.log("I++ ->" + startIncrement);
         continue;
     }
 
@@ -36,7 +36,7 @@ function MyBook() {
         break; //quit the while loop
     }
 
-    start+=pageCharLimit + startIncrement;
+    start+=pageCharLimit + startIncrement; // increment is added here so that beginning of pages arent clipped
     end+=pageCharLimit;
     startIncrement = 0;
     }
@@ -68,6 +68,27 @@ function MyBook() {
     const Pages = PageList.map((page, index) => { 
 
     const pageCol = (index % 2 == 0) ? PageLCol : PageRCol;
+    const words = page.split(" "); // split page into individual words
+     let PageRender : JSX.Element[] = []; 
+
+    // let eArray = <> {
+    //     pArray.join(" ")
+    //     } </>;
+
+
+    // pArray.map((word) => (<></>))
+
+    for(let i = 0; i < words.length; i++){
+
+        if(words[i] !== "Achilles"){
+            PageRender = PageRender.concat(<> {words[i] + " "} </>); // add each word as mini element
+        }else{
+           PageRender = PageRender.concat(<a href=""> {words[i] + " "} </a>);
+        }
+
+    }
+
+
 
     return    (  <div className={styles.page}>
         <div style ={{background:pageCol, height:"100%"}}>
@@ -77,7 +98,7 @@ function MyBook() {
                     src ="https://www.bard.org/news/the-iliad-fact-or-splendid-fiction/images/1531340630064-JJ1QTT7ZVZJYPVVSBV70-Homer.jpg"
                     alt ="missing pictre"
                     style={{ width: 40, height: 40 }}/>       */}
-            {page}   
+            {PageRender}   
         <br/>
         Page {index}
         </div>
