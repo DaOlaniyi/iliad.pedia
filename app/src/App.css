@@ -1,0 +1,11 @@
+.container{
+  width: 100%;
+  width:100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.demoPage {
+  background: white;
+  color: #000;
+}
