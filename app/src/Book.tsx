@@ -1,134 +1,173 @@
 import HTMLFlipBook from 'react-pageflip';
 import styles from './Book.module.css';
-import IliadText from './assets/iliad.json';
+import FullIliad from './assets/iliad.json';
 import type { JSX } from 'react/jsx-runtime';
+import * as Colors from './constants/Colors.tsx';
+import * as Numbers from './constants/Numbers.tsx';
+import * as Utilities from './constants/Utilities.tsx';
+import * as Articles from './data/ArticleManager.tsx';
+import { type SetPageFunc } from './App.tsx';
+import React, { useEffect, useState } from 'react';
 
-function MyBook() {
-
-    const BookWidth = 536/2;
-    const BookHeight = 702/2;
-
-    let FullText = IliadText.BOOK1;
-    let PageList : String[] = [];
-
-    let pageCharLimit = 500;
-    let start = 0;
-    let end = pageCharLimit;
-    let startIncrement = 0;
-
-    while(end < FullText.length){
-
-    const lastChar = FullText.charAt(end - 1); 
-    const stopReached = lastChar === " " || lastChar === "." || lastChar === "," || lastChar === ":" || lastChar === ";";
+export default function Book(props : any) {
     
-    //if we have not reached a stop, keep adding characters (avoids cutting words short between pages)
-    if(!stopReached){ 
-        end++;
-        startIncrement ++;
-        continue;
-    }
+   // const SetPage:SetPageFunc = props;
+    useEffect(() =>{
+        console.log("func = ",props.props.func);
+       // props("test", "");
+    })
+    let FullText = FullIliad['Book 1'];
+    let RawPageBlocks : string[] = [];
 
-    PageList = PageList.concat(FullText.substring(start,end ));
-
-    //If we are on the last section
-      if(end + pageCharLimit > FullText.length){
-        PageList = PageList.concat(FullText.substring(end,FullText.length )); //Add remaining portion
-        break; //quit the while loop
-    }
-
-    start+=pageCharLimit + startIncrement; // increment is added here so that beginning of pages arent clipped
-    end+=pageCharLimit;
-    startIncrement = 0;
-    }
-
-    const PageData = [
-     {
-        id: "001",
-        name: "Page 1",
-        content: <p>Sing, O goddess, the anger of <a href=''>Achilles</a> son of Peleus, that brought countless ills upon the Achaeans. Many a brave soul did it send hurrying down to Hades, and many a hero did it yield a prey to dogs and vultures, for so were the counsels of Jove fulfilled from the day on which the son of Atreus, king of men, and great Achilles, first fell out with one another.</p>
-       }, 
-       {
-        id: "001",
-        name: "Page 1",
-        content: <p>{IliadText.BOOK1}</p>,
-       },{
-        id: "001",
-        name: "Page 1",
-        content: <p>Sing, O goddess, the anger of <a href=''>Achilles</a> son of Peleus, that brought countless ills upon the Achaeans. Many a brave soul did it send hurrying down to Hades, and many a hero did it yield a prey to dogs and vultures, for so were the counsels of Jove fulfilled from the day on which the son of Atreus, king of men, and great Achilles, first fell out with one another.</p>
-       },   {
-        id: "001",
-        name: "Page 1",
-        content: <p>Sing, O goddess, the anger of <a href=''>Achilles</a> son of Peleus, that brought countless ills upon the Achaeans. Many a brave soul did it send hurrying down to Hades, and many a hero did it yield a prey to dogs and vultures, for so were the counsels of Jove fulfilled from the day on which the son of Atreus, king of men, and great Achilles, first fell out with one another.</p>
-       }, 
-    ];
-
-    const PageLCol = "#ffd3aa";
-    const PageRCol = "#ffeaaa";
-
-    const Pages = PageList.map((page, index) => { 
-
-    const pageCol = (index % 2 == 0) ? PageLCol : PageRCol;
-    const words = page.split(" "); // split page into individual words
-     let PageRender : JSX.Element[] = []; 
-
-    // let eArray = <> {
-    //     pArray.join(" ")
-    //     } </>;
-
-
-    // pArray.map((word) => (<></>))
-
-    for(let i = 0; i < words.length; i++){
-
-        if(words[i] !== "Achilles"){
-            PageRender = PageRender.concat(<> {words[i] + " "} </>); // add each word as mini element
-        }else{
-           PageRender = PageRender.concat(<a href=""> {words[i] + " "} </a>);
-        }
-
-    }
-
-
-
-    return    (  <div className={styles.page}>
-        <div style ={{background:pageCol, height:"100%"}}>
-        <div className ={styles.pageContent}>
-            
-            {/* <img 
-                    src ="https://www.bard.org/news/the-iliad-fact-or-splendid-fiction/images/1531340630064-JJ1QTT7ZVZJYPVVSBV70-Homer.jpg"
-                    alt ="missing pictre"
-                    style={{ width: 40, height: 40 }}/>       */}
-            {PageRender}   
-        <br/>
-        Page {index}
-        </div>
-        </div>
-
-        </div>)  })
+    RawPageBlocks = SplitIntoRawPageBlocks(FullText);
+    const PageElements = RawPageBlocks.map((page, index) => CreatePageElement(page, index, props.props.func))
 
     return (
          
         <HTMLFlipBook 
-        width={BookWidth} 
-        height={BookHeight} 
+        width={Numbers.BookWidth} 
+        height={Numbers.BookHeight} 
         maxShadowOpacity={0.5} 
         drawShadow = {true} 
-        showCover = {true}
+        showCover = {false}
         size = "fixed"
         >
             <div className={styles.page} >
                 <img
               src="https://cloud.firebrandtech.com/api/v2/image/111/9780785845508/CoverArtHigh/XL"
               alt=""
-              style={{ width: BookWidth, height: BookHeight }}
+              style={{ width: Numbers.BookWidth, height: Numbers.BookHeight }}
               className={styles.pokemonLogo}
             />
             </div>
-            {Pages}
+            {PageElements}
            
            
          </HTMLFlipBook>
     );
 }
 
-export default MyBook;
+
+
+/** SUMMARY 📝 
+ * @param {string} {TextSample} the raw and single-line text to split into 
+ * @returns {string[]} A list of strings that each contain ~({@link Numbers.MaxPageChars}) amount of characters.
+ *  
+ ⚙️ General Summary {
+    The primary loop adds pages to PageList UNTIL the end index reaches the length of the text.
+    Each iteration of the loop seeks to handle an entire page. Not just one character.  
+ 
+    ⭐️ Word Preservation System {
+      If the ending character lands in the middle of a word: 
+        ‣ Addition to the PageList and StartIndex increments will be skipped.
+        ‣ The EndIndex will increase per iteration UNTIL the ending character is valid. 
+        ‣ A counter will store each increment the start index missed and apply it later.
+ }
+        
+ * ⚠️ NOTE: The character count per page will expand IF AND ONLY IF the final character on a page returns false when passed into {@link Utilities.IsStoppingCharacter}(). 
+ * Explore local function comments for more information.
+ */ 
+function SplitIntoRawPageBlocks(TextSample: string) {
+  
+    let PageList : string[] = [];
+    let MaxPageChars = Numbers.MaxPageChars // Maximum number of characters on page (approximate technically)
+
+    /*The indices for the first and last character in each page.  The 'start' index begins at 0
+    because we want to start at the beginning of the book*/
+    let StartingCharIndex=0;
+    let EndingCharIndex = MaxPageChars; 
+
+    let delayedStartIncrement = 0; 
+
+    // This loop adds pages to PageList UNTIL the end of the text is reached. 
+    // ⚠️ REMEMBER: This loop cycles in large gaps, not in singular increments. 
+    // Ending Indices will go from 500 to 1000 within two steps (if the ending char is a punctuation mark)
+    while (EndingCharIndex < TextSample.length) {
+
+        //Get the ending character and check if we are in the middle of a word or not
+        const endingChar = TextSample.charAt(EndingCharIndex - 1);
+        const stopReached = Utilities.IsStoppingCharacter(endingChar);
+
+        //if we have not reached a stop, keep adding characters (avoids cutting words short between pages)
+        if (!stopReached) {
+            EndingCharIndex++;
+            delayedStartIncrement++;
+            continue;
+        }
+
+        //Substring an entire page of the sample into the page list
+        PageList = PageList.concat(TextSample.substring(StartingCharIndex, EndingCharIndex));
+
+        //If we are on the last section of sample text.
+        if (EndingCharIndex + MaxPageChars > TextSample.length) {
+            PageList = PageList.concat(TextSample.substring(EndingCharIndex, TextSample.length)); //Add remaining portion
+            break; //quit the while loop
+        }
+
+        //Add the char limits to the start and end indices so that we will fetch the next page on the next cycle.  
+        //Also, add the delayed start increment so that the next page doesn't capture the remnants of the previous page 
+        StartingCharIndex += MaxPageChars + delayedStartIncrement; // increment is added here so that beginning of pages arent clipped
+        EndingCharIndex += MaxPageChars;
+        delayedStartIncrement = 0; //reset the delayed increment for the next cycle
+    }
+
+    return PageList;
+}
+
+
+function CreatePageElement(page:string,index: number, setPage:SetPageFunc) { 
+
+     // Split the entire page into individual words.
+    // This is what we'll be processing.
+    const WordList = page.split(" ");
+    
+    //Decide page color
+    const pageColor = Colors.GetPageColor(index);
+    
+    //Create list of elements.  We will add onto this list to create our final output
+    let PageElementList : JSX.Element[] = []; 
+
+    //Cycle through word list and search for keywords
+    for(let i = 0; i < WordList.length; i++){
+
+        let WordStr = WordList[i];
+        let WordJSX = <>  </>;
+        let CleanTitle = "";
+
+
+        CleanTitle = WordStr.replaceAll(",", "");
+        CleanTitle = CleanTitle.replaceAll(".", "");
+        CleanTitle = CleanTitle.replaceAll(":", "");
+
+        const Article:string = Articles.GetArticle(CleanTitle);
+        const ArticleExists = Article !==  "ERROR";
+
+        if(ArticleExists){
+            WordJSX = <><a onClick={() => SetInfoPanel(CleanTitle, Article)}> {WordStr} </a> </>;
+        }else {
+            WordJSX = <> {WordStr + " "} </>;
+        }
+
+        PageElementList = PageElementList.concat(WordJSX); // add each word as mini element
+        
+    }
+
+    function SetInfoPanel(title:string, bio:string) {
+      setPage(title, bio);
+    }
+
+const IndexJSX = <><br/>Page {index}</>; // create page counter
+
+//Return the compiled list of elements, wrapped in the appropriate page div brackets
+    return (  
+    <div className={styles.page}>
+    <div style ={{background:pageColor, height:"100%"}}>
+        <div className ={styles.pageContent}>
+            
+            {PageElementList}   
+            {IndexJSX}
+       
+        </div>
+    </div>
+    </div>)  }
+
