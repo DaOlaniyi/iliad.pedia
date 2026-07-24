@@ -88,9 +88,6 @@ h2 {
     font-size: 20px;
   }
 }
-p {
-  margin: 0;
-}
 
 code,
 .counter {
@@ -112,4 +109,11 @@ a {
   text-decoration: none;
   color: #9710ff;
   cursor: pointer;
+}
+
+p{
+  margin: 0;
+  font-size: 15px;
+  color:black;
+  
 }

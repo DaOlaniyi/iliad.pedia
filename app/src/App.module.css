@@ -19,18 +19,28 @@
   height: 8vh;
   background: #eb4745;
 
-  font-size: 38px;
-  color: white;
-
-  font-family:forgore;
-  src:url('.assets/Forgore.otf') format('otf');
+ 
   display:flex;
   align-items: center;
 }
 
+
+ .MainTitle{
+ font-size: 38px;
+  color: white;
+  font-family:forgore;
+  src:url('.assets/Forgore.otf') format('otf');
+ }
+
+.TitleSuffix{
+  font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+  font-size: 32px;
+  color: white;
+}
+
 .BottomBanner{
   width: 100%;
-  height: 25vh;
+ 
   background: #f69185;
   display: flex;
   flex-direction: column;
@@ -52,11 +62,7 @@ height: 90%;
 width:auto;
 margin: 10px;
 }
- 
-.TitleSuffix{
-  font-family:Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-  font-size: 32px;
-}
+
 
 .InfoPanel{
   width: 90vh;
@@ -86,7 +92,7 @@ margin: 10px;
   height: 70px;
   width: 200px;
 
-}
+ }
 
 .ArticleSubmit{
   width: 20vh;

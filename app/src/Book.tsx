@@ -7,21 +7,31 @@ import * as Numbers from './constants/Numbers.tsx';
 import * as Utilities from './constants/Utilities.tsx';
 import * as Articles from './data/ArticleManager.tsx';
 import { type SetPageFunc } from './App.tsx';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 export default function Book(props : any) {
     
    // const SetPage:SetPageFunc = props;
     useEffect(() =>{
-        console.log("func = ",props.props.func);
-       // props("test", "");
-    })
+        console.log("sending registration to app!");
+        props.props.Register(UpdateBook);//Give app our update method
+    }, [])
+
+      const [PageElements, SetPageElements] = useState<JSX.Element[]>([<></>]);
+
+
     let FullText = FullIliad['Book 1'];
     let RawPageBlocks : string[] = [];
 
     RawPageBlocks = SplitIntoRawPageBlocks(FullText);
-    const PageElements = RawPageBlocks.map((page, index) => CreatePageElement(page, index, props.props.func))
-
+   
+    const UpdateBook = useCallback((articles: Map<string,string>)=> {
+        if(!articles) return;
+        console.log("Book is being told to update by app!");
+        const book = RawPageBlocks.map((page, index) => CreatePageElement(page, index, props.props.SetInfo, articles));
+        SetPageElements(book);
+    },[])
+    
     return (
          
         <HTMLFlipBook 
@@ -115,7 +125,7 @@ function SplitIntoRawPageBlocks(TextSample: string) {
 }
 
 
-function CreatePageElement(page:string,index: number, setPage:SetPageFunc) { 
+function CreatePageElement(page:string,index: number, setPage:SetPageFunc, ArticleMap:Map<string,string>) { 
 
      // Split the entire page into individual words.
     // This is what we'll be processing.
@@ -139,13 +149,17 @@ function CreatePageElement(page:string,index: number, setPage:SetPageFunc) {
         CleanTitle = CleanTitle.replaceAll(".", "");
         CleanTitle = CleanTitle.replaceAll(":", "");
 
-        const Article:string = Articles.GetArticle(CleanTitle);
-        const ArticleExists = Article !==  "ERROR";
+        
+        const ArticleExists = ArticleMap.has(CleanTitle);
 
-        if(ArticleExists){
-            WordJSX = <><a onClick={() => SetInfoPanel(CleanTitle, Article)}> {WordStr} </a> </>;
-        }else {
-            WordJSX = <> {WordStr + " "} </>;
+        if(!ArticleExists){
+                        WordJSX = <> {WordStr + " "} </>;
+        }
+        else {
+           const Article = ArticleMap.get(CleanTitle);
+           if(Article){
+                WordJSX = <><a onClick={() => SetInfoPanel(CleanTitle, Article)}> {WordStr} </a> </>;
+           }
         }
 
         PageElementList = PageElementList.concat(WordJSX); // add each word as mini element
