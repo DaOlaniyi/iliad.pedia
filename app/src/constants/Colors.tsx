@@ -1,5 +1,5 @@
-export const PageLCol = "#ffd3aa";
-export const PageRCol = "#ffeaaa";
+export const PageLCol = "#ffffff";
+export const PageRCol = "#eeeeee";
 
 export const LightCoral = "#f69185";
 export const VibrantRed = "#eb4745";

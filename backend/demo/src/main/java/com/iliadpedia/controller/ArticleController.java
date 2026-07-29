@@ -39,6 +39,25 @@ public class ArticleController {
         return ResponseEntity.ok(Map.of("articles", result));
 
     }
+
+
+    @PostMapping("/editarticle")
+    public ResponseEntity<?>  editArticle(@RequestBody Map<String, String> body) {
+        
+        String title = body.get("title");
+        String bio = body.get("bio");
+        System.out.println("Edit Request->(" + title + ", " + bio+")");
+
+        RestClient client = RestClient.create();
+        String result = client.post()
+        .uri("https://api.doidity.com/editArticle.php")
+        .body(Map.of("title", title, "biography", bio))
+        .retrieve()
+        .body(String.class);
+
+        return ResponseEntity.ok(Map.of("result", result));
+
+    }
 }
 
 // Use RestClient (Spring 6.1+) or WebClient / HttpClient

@@ -105,15 +105,19 @@ code {
 }
 
 a {
-  font-weight: bold;
   text-decoration: none;
-  color: #9710ff;
+  color: #1260fc;
   cursor: pointer;
+
+}
+
+a:hover{
+  text-decoration:underline;
 }
 
 p{
   margin: 0;
-  font-size: 15px;
+  /* font-size: 15px; */
   color:black;
   
 }

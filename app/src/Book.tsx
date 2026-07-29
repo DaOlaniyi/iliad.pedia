@@ -5,6 +5,8 @@ import type { JSX } from 'react/jsx-runtime';
 import * as Colors from './constants/Colors.tsx';
 import * as Numbers from './constants/Numbers.tsx';
 import * as Utilities from './constants/Utilities.tsx';
+import { motion, scale } from "motion/react"
+
 import * as Articles from './data/ArticleManager.tsx';
 import { type SetPageFunc } from './App.tsx';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -17,10 +19,11 @@ export default function Book(props : any) {
         props.props.Register(UpdateBook);//Give app our update method
     }, [])
 
-      const [PageElements, SetPageElements] = useState<JSX.Element[]>([<></>]);
+    const [PageElements, SetPageElements] = useState<JSX.Element[]>([<></>]);
 
 
     let FullText = FullIliad['Book 1'];
+    FullText.replaceAll("\"", " \"");
     let RawPageBlocks : string[] = [];
 
     RawPageBlocks = SplitIntoRawPageBlocks(FullText);
@@ -28,19 +31,19 @@ export default function Book(props : any) {
     const UpdateBook = useCallback((articles: Map<string,string>)=> {
         if(!articles) return;
         console.log("Book is being told to update by app!");
-        const book = RawPageBlocks.map((page, index) => CreatePageElement(page, index, props.props.SetInfo, articles));
+        const book = RawPageBlocks.map((page, index) => CreatePageElement(page, index + 1, props.props.SetInfo, articles));
         SetPageElements(book);
     },[])
     
     return (
-         
-        <HTMLFlipBook 
+         <>   <HTMLFlipBook 
         width={Numbers.BookWidth} 
         height={Numbers.BookHeight} 
         maxShadowOpacity={0.5} 
         drawShadow = {true} 
         showCover = {false}
-        size = "fixed"
+        size= "fixed"
+        className={styles.BookParent}
         >
             <div className={styles.page} >
                 <img
@@ -50,10 +53,14 @@ export default function Book(props : any) {
               className={styles.pokemonLogo}
             />
             </div>
+
             {PageElements}
            
            
          </HTMLFlipBook>
+                 </>
+     
+
     );
 }
 
@@ -129,8 +136,8 @@ function CreatePageElement(page:string,index: number, setPage:SetPageFunc, Artic
 
      // Split the entire page into individual words.
     // This is what we'll be processing.
-    const WordList = page.split(" ");
-    
+    let WordList = page.split(/(\s+|["'.:;!?,\-])/);
+    console.log("Word List = " , WordList)
     //Decide page color
     const pageColor = Colors.GetPageColor(index);
     
@@ -148,17 +155,19 @@ function CreatePageElement(page:string,index: number, setPage:SetPageFunc, Artic
         CleanTitle = WordStr.replaceAll(",", "");
         CleanTitle = CleanTitle.replaceAll(".", "");
         CleanTitle = CleanTitle.replaceAll(":", "");
+        CleanTitle = CleanTitle.replaceAll("\"", "");
+        CleanTitle = CleanTitle.replaceAll("-", "");
 
         
         const ArticleExists = ArticleMap.has(CleanTitle);
 
         if(!ArticleExists){
-                        WordJSX = <> {WordStr + " "} </>;
+                        WordJSX = <>{WordStr}</>;
         }
         else {
            const Article = ArticleMap.get(CleanTitle);
            if(Article){
-                WordJSX = <><a onClick={() => SetInfoPanel(CleanTitle, Article)}> {WordStr} </a> </>;
+                WordJSX = <><a onClick={() => SetInfoPanel(CleanTitle, Article)}>{WordStr}</a></>;
            }
         }
 
@@ -179,9 +188,11 @@ const IndexJSX = <><br/>Page {index}</>; // create page counter
         <div className ={styles.pageContent}>
             
             {PageElementList}   
-            {IndexJSX}
        
         </div>
+        <div className={styles.PageNumber}>{IndexJSX}</div>
+                    
+
     </div>
     </div>)  }
 
