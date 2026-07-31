@@ -11,6 +11,7 @@ type Article = {
     title : string,
     biography : string
 }
+//Enum to determine whether user is viewing or editing
 enum TextState {Viewing="VIEWING", Editing="EDITING"}
   
 function App() {
@@ -26,16 +27,18 @@ function App() {
   //Variables for user-created Pages (title and biography)
   const [CustomTitle, CT_Setter] = useState<string>();//
   const [CustomBio, CB_Setter] = useState<string>();
+  const [BioState,SetBioState] = useState<TextState>(TextState.Viewing);
 
   //Variables for fetched data
   const [BackendStatus, SetBackendStatus] = useState<string>("Inactive");
   const [ArticleMap, SetArticleMap] = useState<Map<string, string>>(new Map());
   const [BookUpdate,SetBookUpdate] = useState<(articles:Map<string,string>)=>void>();
 
+  //Variables for Selection Panel
   const [SelectionNumber,SetSelectionNumber] = useState<number>(1);
-  const [BioState,SetBioState] = useState<TextState>(TextState.Viewing);
   
   const [EditedBio, SetEditedBio] = useState<string>();
+
   //Setter functions for input texts, used for rule validation (title and biography)
   const SetCustomTitle = ((s:string) => {
     CT_Setter(s);
@@ -53,16 +56,17 @@ function App() {
     SetBio(b);
   },[]);
 
-  function limit(e : any, n:number){
-    if(e.target.value<n){
+  //Limiter to bound Selection number between 1 - 24.
+  function NumberLimiter(e : any, min:number){
+    if(e.target.value < min)
+      {
       SetSelectionNumber(1);
-    }else if(e.target.value > 24){
+    }
+    else if(e.target.value > 24){
             SetSelectionNumber(24);
     }else {
       SetSelectionNumber(e.target.value);
     }
-  // if(n=="24") return "24";
-  // else if(n<0) return n;
 }
 
 /*Book.tsx passes app its update method.
@@ -101,14 +105,17 @@ const GetArticles = async (UpdateBookMethod:(articles:Map<string,string>)=>void)
 //Fetcher that retrieves articles JSON from servers
 const EditArticle = async () => {
   try {
+
     if(EditedBio==null) {
       alert("Please include a biography the article you are editing" );
-      return};
+      return
+    };
     const res = await fetch("http://localhost:8080/api/editarticle", {
       method: "POST",
       headers: { "Content-Type": "application/json"},
       body: JSON.stringify({ "title": InfoTitle, "bio": EditedBio })
     })
+
     const data = await res.json();
     const phpResponse = JSON.parse(data.result);//parse JSON
     alert("Article Updated, result: " +  phpResponse.result);
@@ -180,7 +187,7 @@ const SwitchBioState = ()=> {
   {
     SetBioState(TextState.Editing);
   }else{
-      SetBioState(TextState.Viewing);
+     SetBioState(TextState.Viewing);
   }
 }
 
@@ -230,7 +237,7 @@ const GetBio = ()=>{
           <Book props ={BookProps}/>
           <div className ={styles.SelectorPanel}>
             <b>Selection Options</b> <br/>
-            Book <input className={styles.BookNumberInput} defaultValue={1} value = {SelectionNumber} onChange ={(e)=>{limit(e, 0)}} onBlur={(e)=>limit(e, 1)} type="number"></input>
+            Book <input className={styles.BookNumberInput} defaultValue={1} value = {SelectionNumber} onChange ={(e)=>{NumberLimiter(e, 0)}} onBlur={(e)=>NumberLimiter(e, 1)} type="number"></input>
             <button style={{marginLeft:"5px"}}>GO</button>
      
             </div>

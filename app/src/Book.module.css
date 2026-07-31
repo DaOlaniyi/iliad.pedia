@@ -24,7 +24,8 @@
   color: #000;
   font-size: 15px;
   display: flex;
-
+  
+   align-content: center;
 }
 
 
@@ -67,4 +68,27 @@
     font-family: "EB Garamond", serif;
     font-style: italic;
     text-align: center;
+}
+
+.bookNumber{
+     text-align: center;
+  
+
+}
+
+.BannerButton{
+  height: 40px;
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: 1px solid transparent;
+  border:0px;
+  color:white;
+  font-family: sen;
+}
+.BannerButton:hover{
+  outline: 1px solid #ffffff24;
+  background-color: transparent;
+  color:white;
+  border: none;
 }
