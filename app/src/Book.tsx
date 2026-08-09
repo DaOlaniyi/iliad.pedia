@@ -27,7 +27,7 @@ export default function Book(props : any) {
     const [FullText, SetFullText] =useState<string>("");
     const [RawPageBlocks, SetRawPageBlocks] = useState<string[]>([]);
 
-    const BookRef = useRef<HTMLFlipBook | null>(null);
+    const BookRef = useRef<any>(null);
     const [PageNumber, SetPageNumber] = useState<number>(); 
     const [BookNumber, SetBookNumber] = useState<number>(1); 
     const [CurrentState, SetState] = useState<BookState>(BookState.Initializing); 
@@ -133,7 +133,10 @@ export default function Book(props : any) {
   });
     
     return (
-         <>   <HTMLFlipBook 
+
+         <>   
+         {/* @ts-expect-error - react-pageflip types are incomplete */}
+         <HTMLFlipBook 
         width={Numbers.BookWidth} 
         height={Numbers.BookHeight} 
         maxShadowOpacity={0.5} 
