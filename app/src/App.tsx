@@ -13,7 +13,7 @@ type Article = {
 }
 //Enum to determine whether user is viewing or editing
 enum TextState {Viewing="VIEWING", Editing="EDITING"}
-  
+const API = import.meta.env.VITE_API_URL
 function App() {
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const Register = useCallback((UpdateMethod:(articles:Map<string,string>)=>void)=
 //Fetcher that retrieves articles JSON from servers
 const GetArticles = async (UpdateBookMethod:(articles:Map<string,string>)=>void) => {
   try {
-    const res = await fetch("http://localhost:8080/api/getarticles");
+    const res = await fetch(`${API}/api/getarticles`);
     const data = await res.json();
     const articles = JSON.parse(data.articles);//parse JSON
   
@@ -110,7 +110,7 @@ const EditArticle = async () => {
       alert("Please include a biography the article you are editing" );
       return
     };
-    const res = await fetch("http://localhost:8080/api/editarticle", {
+    const res = await fetch(`${API}/api/editarticle`, {
       method: "POST",
       headers: { "Content-Type": "application/json"},
       body: JSON.stringify({ "title": InfoTitle, "bio": EditedBio })
@@ -138,7 +138,7 @@ const EditArticle = async () => {
 //Fetcher that retrieves basic response from backend
 const GetBackendStatus = async () => {
   try {
-    const res = await fetch("http://localhost:8080/api/health", {
+    const res = await fetch(`${API}/api/health`, {
       method: "GET",
       headers: { "Content-Type": "application/json"} })
     const data = await res.json();
@@ -153,7 +153,7 @@ const GetBackendStatus = async () => {
 const PostCustomArticle = async () => {
 
   try {
-    const res = await fetch("http://localhost:8080/api/submit", {
+    const res = await fetch(`${API}/api/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json"},
       body: JSON.stringify({ "title": CustomTitle, "bio": CustomBio })
